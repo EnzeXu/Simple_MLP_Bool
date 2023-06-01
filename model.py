@@ -272,7 +272,7 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_val.append(
                         [val_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[val_idx[row_id]]]),
-                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[val_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[val_idx[row_id]].numpy()]),
                         ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
@@ -316,7 +316,7 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_train.append(
                         [train_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[train_idx[row_id]]]),
-                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[train_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[train_idx[row_id]].numpy()]),
                         ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
