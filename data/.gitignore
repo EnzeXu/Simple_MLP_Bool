@@ -1,0 +1,5 @@
+*
+!.gitignore
+!x.csv
+!y.csv
+!dataset_osci_0_1_2.csv
