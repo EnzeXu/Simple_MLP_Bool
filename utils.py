@@ -50,14 +50,14 @@ def calculate_scores(truth_list, prediction_list, f=None):
     f_score = 2 * (precision * recall) / (precision + recall)
 
     # Print the formulas and results
-    print("Length = {}".format(len(truth_list)))
-    print("TP = {}".format(TP))
-    print("FP = {}".format(FP))
-    print("FN = {}".format(FN))
-    print("TN = {}".format(TN))
-    print("Precision = TP / (TP + FP) = {:.4f}".format(precision))
-    print("Recall = TP / (TP + FN) = {:.4f}".format(recall))
-    print("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}".format(f_score))
+    # print("Length = {}".format(len(truth_list)))
+    # print("TP = {}".format(TP))
+    # print("FP = {}".format(FP))
+    # print("FN = {}".format(FN))
+    # print("TN = {}".format(TN))
+    # print("Precision = TP / (TP + FP) = {:.4f}".format(precision))
+    # print("Recall = TP / (TP + FN) = {:.4f}".format(recall))
+    # print("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}".format(f_score))
 
     if f is not None:
         f.write("\n")
