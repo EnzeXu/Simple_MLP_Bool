@@ -33,23 +33,17 @@ def decode(data_encoded, data_min, data_max):
 
 
 def calculate_scores(truth_list, prediction_list, f=None):
-    # Calculate TP, FP, FN, TN
     assert len(truth_list) == len(prediction_list)
     TP = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 1 and prediction == 1])
     FP = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 0 and prediction == 1])
     FN = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 1 and prediction == 0])
     TN = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 0 and prediction == 0])
 
-    # Calculate precision
+    accuracy = (TP + TN) / (TP + FP + FN + TN)
     precision = TP / (TP + FP)
-
-    # Calculate recall
     recall = TP / (TP + FN)
-
-    # Calculate F-score
     f_score = 2 * (precision * recall) / (precision + recall)
 
-    # Print the formulas and results
     # print("Length = {}".format(len(truth_list)))
     # print("TP = {}".format(TP))
     # print("FP = {}".format(FP))
@@ -66,6 +60,7 @@ def calculate_scores(truth_list, prediction_list, f=None):
         f.write("FP = {}\n".format(FP))
         f.write("FN = {}\n".format(FN))
         f.write("TN = {}\n".format(TN))
+        f.write("Accuracy = (TP + TN) / (TP + FP + FN + TN) = {:.4f}\n".format(accuracy))
         f.write("Precision = TP / (TP + FP) = {:.4f}\n".format(precision))
         f.write("Recall = TP / (TP + FN) = {:.4f}\n".format(recall))
         f.write("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}\n".format(f_score))
