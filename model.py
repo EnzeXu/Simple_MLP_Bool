@@ -196,8 +196,8 @@ def generate_output(pt_path, timestring=None, device=None):
         val_dataset = pickle.load(f)
     with open(main_path + "processed/train.pkl", "rb") as f:
         train_dataset = pickle.load(f)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
 
     if not device:
         gpu_id = 0
@@ -349,8 +349,8 @@ if __name__ == "__main__":
     with open(main_path + "processed/valid.pkl", "rb") as f:
         val_dataset = pickle.load(f)
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     gpu_id = 0
