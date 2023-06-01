@@ -320,7 +320,7 @@ def generate_output(pt_path, timestring=None, device=None):
                         ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
-                    truth_list += [round(item) for item in y_data_raw[val_idx[row_id]].numpy()]
+                    truth_list += [round(item) for item in y_data_raw[train_idx[row_id]].numpy()]
                     prediction_list += [round(item) for item in outputs[i]]
                     row_id += 1
 
