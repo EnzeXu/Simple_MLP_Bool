@@ -50,7 +50,6 @@ class MyDataset(Dataset):
         y = self.y_data[idx]
         return x, y
 
-
 def one_time_generate_dataset():
     t0 = time.time()
     dataset = MyDataset("data/dataset_0_1_2.csv")
