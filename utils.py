@@ -32,6 +32,46 @@ def decode(data_encoded, data_min, data_max):
     return data_encoded * (data_max - data_min) + data_min
 
 
+def calculate_scores(truth_list, prediction_list, f=None):
+    # Calculate TP, FP, FN, TN
+    assert len(truth_list) == len(prediction_list)
+    TP = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 1 and prediction == 1])
+    FP = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 0 and prediction == 1])
+    FN = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 1 and prediction == 0])
+    TN = sum([1 for truth, prediction in zip(truth_list, prediction_list) if truth == 0 and prediction == 0])
+
+    # Calculate precision
+    precision = TP / (TP + FP)
+
+    # Calculate recall
+    recall = TP / (TP + FN)
+
+    # Calculate F-score
+    f_score = 2 * (precision * recall) / (precision + recall)
+
+    # Print the formulas and results
+    print("Length = {}".format(len(truth_list)))
+    print("TP = {}".format(TP))
+    print("FP = {}".format(FP))
+    print("FN = {}".format(FN))
+    print("TN = {}".format(TN))
+    print("Precision = TP / (TP + FP) = {:.4f}".format(precision))
+    print("Recall = TP / (TP + FN) = {:.4f}".format(recall))
+    print("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}".format(f_score))
+
+    if f is not None:
+        f.write("\n")
+        f.write("Length = {}\n".format(len(truth_list)))
+        f.write("TP = {}\n".format(TP))
+        f.write("FP = {}\n".format(FP))
+        f.write("FN = {}\n".format(FN))
+        f.write("TN = {}\n".format(TN))
+        f.write("Precision = TP / (TP + FP) = {:.4f}\n".format(precision))
+        f.write("Recall = TP / (TP + FN) = {:.4f}\n".format(recall))
+        f.write("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}\n".format(f_score))
+
+
+
 if __name__ == "__main__":
     # a = np.asarray([1.0, 2.0, 3.0])
     a = torch.tensor([1.0, 2.0, 3.0])

@@ -11,7 +11,7 @@ import torch.nn as nn
 import pandas as pd
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-from utils import get_now_string, decode
+from utils import get_now_string, decode, calculate_scores
 from tqdm import tqdm
 from dataset import MyDataset
 import os
@@ -252,10 +252,12 @@ def generate_output(pt_path, timestring=None, device=None):
     x_data_raw[:, 2:3] = decode(x_data_raw[:, 2:3], x3_min, x3_max)
     y_data_raw[:, :] = decode(y_data_raw[:, :], y_min, y_max)
 
-    with open(save_output_path_val, "a") as f:
-        f.write("id,[x],[y],[y_pred]\n")
+    with open(save_output_path_val, "w") as f:
+        f.write("id,[x],[y],[y_pred],[y_pred_init]\n")
         row_id = 0
         sorted_output_val = []
+        truth_list = []
+        prediction_list = []
         with torch.no_grad():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
@@ -270,27 +272,36 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_val.append(
                         [val_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[val_idx[row_id]]]),
-                        ",".join([str("{0:.12f}".format(item)) for item in y_data_raw[val_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[val_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
+                    truth_list += [round(item) for item in y_data_raw[val_idx[row_id]]]
+                    prediction_list += [round(item) for item in outputs[i]]
                     row_id += 1
+
 
         sorted_output_val = sorted(sorted_output_val, key=lambda x: x[0])
         for one_output in sorted_output_val:
             # print("[model] input: {} / labels: {} / output: {}".format(str(list(inputs[i])), str(list(labels[i])), str(list(outputs[i]))))
             # print("[original] x: {} / y: {} ".format(str(list(x_data_raw[val_idx[row_id]])), str(list(y_data_raw[val_idx[row_id]]))))
-            f.write("{0:d},{1},{2},{3}\n".format(
+            f.write("{0:d},{1},{2},{3},{4}\n".format(
                 one_output[0],
                 one_output[1],
                 one_output[2],
                 one_output[3],
+                one_output[4],
             ))
+        calculate_scores(truth_list, prediction_list, f)
+
     print("saved val output to {}".format(save_output_path_val))
 
-    with open(save_output_path_train, "a") as f:
-        f.write("id,[x],[y],[y_pred]\n")
+    with open(save_output_path_train, "w") as f:
+        f.write("id,[x],[y],[y_pred],[y_pred_init]\n")
         row_id = 0
         sorted_output_train = []
+        truth_list = []
+        prediction_list = []
         with torch.no_grad():
             for inputs, labels in train_loader:
                 inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
@@ -305,21 +316,27 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_train.append(
                         [train_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[train_idx[row_id]]]),
-                        ",".join([str("{0:.12f}".format(item)) for item in y_data_raw[train_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[train_idx[row_id]]]),
+                        ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
+                    truth_list += [round(item) for item in y_data_raw[val_idx[row_id]]]
+                    prediction_list += [round(item) for item in outputs[i]]
                     row_id += 1
 
         sorted_output_train = sorted(sorted_output_train, key=lambda x: x[0])
         for one_output in sorted_output_train:
             # print("[model] input: {} / labels: {} / output: {}".format(str(list(inputs[i])), str(list(labels[i])), str(list(outputs[i]))))
             # print("[original] x: {} / y: {} ".format(str(list(x_data_raw[val_idx[row_id]])), str(list(y_data_raw[val_idx[row_id]]))))
-            f.write("{0:d},{1},{2},{3}\n".format(
+            f.write("{0:d},{1},{2},{3},{4}\n".format(
                 one_output[0],
                 one_output[1],
                 one_output[2],
                 one_output[3],
+                one_output[4],
             ))
+        calculate_scores(truth_list, prediction_list, f)
+
     print("saved train output to {}".format(save_output_path_train))
 
 

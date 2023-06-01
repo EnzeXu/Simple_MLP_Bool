@@ -21,7 +21,7 @@ class MyDataset(Dataset):
         df = pd.read_csv(path, header=None)
 
         self.x_data = torch.tensor(df.values, dtype=torch.float32)[:, :3]
-        self.y_data = torch.tensor(df.values, dtype=torch.float32)[:, 3:4]
+        self.y_data = torch.tensor(df.values, dtype=torch.float32)[:, 6:7]
         self.x_data[:, 0:1], x1_min, x1_max = my_min_max(self.x_data[:, 0:1])
         self.x_data[:, 1:2], x2_min, x2_max = my_min_max(self.x_data[:, 1:2])
         self.x_data[:, 2:3], x3_min, x3_max = my_min_max(self.x_data[:, 2:3])
@@ -53,7 +53,7 @@ class MyDataset(Dataset):
 
 def one_time_generate_dataset():
     t0 = time.time()
-    dataset = MyDataset("data/dataset_osci_0_1_2.csv")
+    dataset = MyDataset("data/dataset_0_1_2.csv")
 
     print(dataset.x_data[0], dataset.y_data[0])
 
