@@ -23,21 +23,22 @@ class MyModel(nn.Module):
         self.x_dim = x_dim
         self.y_dim = y_dim
         self.fc = nn.Sequential(
-            nn.Linear(self.x_dim, 128),
+            nn.Linear(self.x_dim, 128, dtype=torch.float64),
             nn.Dropout(0.2),
-            nn.BatchNorm1d(128),
+            nn.BatchNorm1d(128, dtype=torch.float64),
             nn.ReLU(),
-            nn.Linear(128, 128),
+            nn.Linear(128, 256, dtype=torch.float64),
             nn.Dropout(0.2),
-            nn.BatchNorm1d(128),
+            nn.BatchNorm1d(256, dtype=torch.float64),
             nn.ReLU(),
             # nn.Linear(256, 256),  #
             # nn.BatchNorm1d(256),  #
             # nn.ReLU(),  #
-            # nn.Linear(256, 128),
-            # nn.BatchNorm1d(128),
-            # nn.ReLU(),
-            nn.Linear(128, self.y_dim),
+            nn.Linear(256, 128, dtype=torch.float64),
+            nn.Dropout(0.2),
+            nn.BatchNorm1d(128, dtype=torch.float64),
+            nn.ReLU(),
+            nn.Linear(128, self.y_dim, dtype=torch.float64),
         )
         # print("{} layers".format(len(self.fc)))
 
@@ -49,7 +50,7 @@ def train(model, dataloader, criterion, optimizer, device):
     model.train()
     running_loss = 0.0
     for inputs, labels in dataloader:  # tqdm(dataloader, total=len(dataloader)):
-        inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+        inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = criterion(outputs, labels)
@@ -64,7 +65,7 @@ def validate(model, dataloader, criterion, device):
     running_loss = 0.0
     with torch.no_grad():
         for inputs, labels in dataloader:
-            inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+            inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             running_loss += loss.item()
@@ -76,7 +77,7 @@ def validate(model, dataloader, criterion, device):
 #     running_loss = 0.0
 #     with torch.no_grad():
 #         for inputs, labels in dataloader:
-#             inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+#             inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
 #             output = model(inputs)
 #             loss = criterion(output, labels)
 #             running_loss += loss.item()
@@ -119,8 +120,12 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
             print(info_epoch + info_best + info_extended)
 
             # print("model saved to {}".format(main_path + "saves/model_{}.pt".format(timestring)))
-        if epoch % 50 == 0:
-            generate_output(main_path + "saves/model_{}.pt".format(record_timestring_start), record_timestring_start, device)
+        if epoch % 50 == 0 or epoch == epochs:
+            torch.save(model.state_dict(), main_path + "saves/model_{}_last.pt".format(record_timestring_start))
+            generate_output(main_path + "saves/model_{}_best.pt".format(record_timestring_start),
+                            record_timestring_start, device, "best")
+            generate_output(main_path + "saves/model_{}_last.pt".format(record_timestring_start),
+                            record_timestring_start, device, "last")
 
         scheduler.step()
         # if (epoch + 1) % 10 == 0:
@@ -163,7 +168,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
         row_id = 0
         with torch.no_grad():
             for inputs, labels in val_loader:
-                inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+                inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
                 outputs = model(inputs)
                 labels = labels.cpu().detach().numpy()
                 outputs = outputs.cpu().detach().numpy()
@@ -178,7 +183,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
                         " ".join([str("{0:.12f}".format(item)) for item in outputs[i]]),
                     ))
     print("saved comparison to {}".format(save_comparison_path))
-    generate_output(main_path + "saves/model_{}.pt".format(record_timestring_start), record_timestring_start, device)
+    # generate_output(main_path + "saves/model_{}.pt".format(record_timestring_start), record_timestring_start, device)
 
 def relative_loss(prediction, target):
     criterion = nn.MSELoss(reduction="none")
@@ -188,7 +193,7 @@ def relative_loss(prediction, target):
     return errors
 
 
-def generate_output(pt_path, timestring=None, device=None):
+def generate_output(pt_path, timestring=None, device=None, pt_type="test"):
     main_path = "./"
     with open(main_path + "processed/all.pkl", "rb") as f:
         dataset = pickle.load(f)
@@ -196,8 +201,8 @@ def generate_output(pt_path, timestring=None, device=None):
         val_dataset = pickle.load(f)
     with open(main_path + "processed/train.pkl", "rb") as f:
         train_dataset = pickle.load(f)
-    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False)
 
     if not device:
         gpu_id = 0
@@ -217,8 +222,8 @@ def generate_output(pt_path, timestring=None, device=None):
         os.makedirs(save_output_folder)
     if not timestring:
         timestring = get_now_string()
-    save_output_path_val = f"{save_output_folder}/output_{timestring}_val.txt"
-    save_output_path_train = f"{save_output_folder}/output_{timestring}_train.txt"
+    save_output_path_val = f"{save_output_folder}/output_{timestring}_{pt_type}_val.txt"
+    save_output_path_train = f"{save_output_folder}/output_{timestring}_{pt_type}_train.txt"
 
     # x_df = pd.read_csv("data/x.csv")
     # y_df = pd.read_csv("data/y.csv")
@@ -253,14 +258,12 @@ def generate_output(pt_path, timestring=None, device=None):
     y_data_raw[:, :] = decode(y_data_raw[:, :], y_min, y_max)
 
     with open(save_output_path_val, "w") as f:
-        f.write("id,[x],[y],[y_pred],[y_pred_init]\n")
+        f.write("id,[x],[y],[y_pred]\n")
         row_id = 0
         sorted_output_val = []
-        truth_list = []
-        prediction_list = []
         with torch.no_grad():
             for inputs, labels in val_loader:
-                inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+                inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
                 outputs = model(inputs)
                 inputs = inputs.cpu().detach().numpy()
                 labels = labels.cpu().detach().numpy()
@@ -272,39 +275,30 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_val.append(
                         [val_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[val_idx[row_id]]]),
-                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[val_idx[row_id]].numpy()]),
-                        ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
+                        ",".join([str("{0:.12f}".format(item)) for item in y_data_raw[val_idx[row_id]]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
-                    truth_list += [round(item) for item in y_data_raw[val_idx[row_id]].numpy()]
-                    prediction_list += [round(item) for item in outputs[i]]
                     row_id += 1
-
 
         sorted_output_val = sorted(sorted_output_val, key=lambda x: x[0])
         for one_output in sorted_output_val:
             # print("[model] input: {} / labels: {} / output: {}".format(str(list(inputs[i])), str(list(labels[i])), str(list(outputs[i]))))
             # print("[original] x: {} / y: {} ".format(str(list(x_data_raw[val_idx[row_id]])), str(list(y_data_raw[val_idx[row_id]]))))
-            f.write("{0:d},{1},{2},{3},{4}\n".format(
+            f.write("{0:d},{1},{2},{3}\n".format(
                 one_output[0],
                 one_output[1],
                 one_output[2],
                 one_output[3],
-                one_output[4],
             ))
-        calculate_scores(truth_list, prediction_list, f)
-
     print("saved val output to {}".format(save_output_path_val))
 
     with open(save_output_path_train, "w") as f:
-        f.write("id,[x],[y],[y_pred],[y_pred_init]\n")
+        f.write("id,[x],[y],[y_pred]\n")
         row_id = 0
         sorted_output_train = []
-        truth_list = []
-        prediction_list = []
         with torch.no_grad():
             for inputs, labels in train_loader:
-                inputs, labels = inputs.to(dtype=torch.float32).to(device), labels.to(dtype=torch.float32).to(device)
+                inputs, labels = inputs.to(dtype=torch.float64).to(device), labels.to(dtype=torch.float64).to(device)
                 outputs = model(inputs)
                 inputs = inputs.cpu().detach().numpy()
                 labels = labels.cpu().detach().numpy()
@@ -316,27 +310,21 @@ def generate_output(pt_path, timestring=None, device=None):
                     sorted_output_train.append(
                         [train_idx[row_id],
                         ",".join([str("{0:.12f}".format(item)) for item in x_data_raw[train_idx[row_id]]]),
-                        ",".join([str("{0:d}".format(round(item))) for item in y_data_raw[train_idx[row_id]].numpy()]),
-                        ",".join([str("{0:d}".format(round(item))) for item in outputs[i]]),
+                        ",".join([str("{0:.12f}".format(item)) for item in y_data_raw[train_idx[row_id]]]),
                         ",".join([str("{0:.12f}".format(item)) for item in outputs[i]])]
                     )
-                    truth_list += [round(item) for item in y_data_raw[train_idx[row_id]].numpy()]
-                    prediction_list += [round(item) for item in outputs[i]]
                     row_id += 1
 
         sorted_output_train = sorted(sorted_output_train, key=lambda x: x[0])
         for one_output in sorted_output_train:
             # print("[model] input: {} / labels: {} / output: {}".format(str(list(inputs[i])), str(list(labels[i])), str(list(outputs[i]))))
             # print("[original] x: {} / y: {} ".format(str(list(x_data_raw[val_idx[row_id]])), str(list(y_data_raw[val_idx[row_id]]))))
-            f.write("{0:d},{1},{2},{3},{4}\n".format(
+            f.write("{0:d},{1},{2},{3}\n".format(
                 one_output[0],
                 one_output[1],
                 one_output[2],
                 one_output[3],
-                one_output[4],
             ))
-        calculate_scores(truth_list, prediction_list, f)
-
     print("saved train output to {}".format(save_output_path_train))
 
 
@@ -371,7 +359,7 @@ if __name__ == "__main__":
 
     wandb_flag = True
     if wandb_flag:
-        with wandb.init(project='Simple_MLP', name='test'):
+        with wandb.init(project='Simple_MLP_Bool', name='test'):
             run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path)
     else:
          run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path)

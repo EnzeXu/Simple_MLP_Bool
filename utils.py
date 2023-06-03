@@ -7,6 +7,10 @@ import torch
 import pandas as pd
 import os
 from torch.utils.data import Dataset, DataLoader
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from tqdm import tqdm
+from matplotlib.cm import ScalarMappable
 
 
 def get_now_string():
@@ -66,8 +70,96 @@ def calculate_scores(truth_list, prediction_list, f=None):
         f.write("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}\n".format(f_score))
 
 
+def draw_3d_points(data_truth, data_prediction, save_path):
+    data_truth = data_truth[:]
+    data_prediction = data_prediction[:]
+    fig = plt.figure(figsize=(16, 8))
+
+    ax = fig.add_subplot(121, projection='3d')
+    x = [point[0] for point in data_truth]
+    y = [point[1] for point in data_truth]
+    z = [point[2] for point in data_truth]
+    val = [point[3] for point in data_truth]
+
+    cmap = 'cool'
+
+    scatter = ax.scatter(x, y, z, c=val, cmap=cmap)
+    colorbar = plt.colorbar(ScalarMappable(cmap=cmap), ax=ax, shrink=0.5)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.tick_params(axis='x', labelsize=10)
+    ax.tick_params(axis='y', labelsize=10)
+    ax.tick_params(axis='z', labelsize=10)
+    ax.set_title("Truth of Test Set")
+
+
+    ax = fig.add_subplot(122, projection='3d')
+    x = [point[0] for point in data_prediction]
+    y = [point[1] for point in data_prediction]
+    z = [point[2] for point in data_prediction]
+    val = [point[3] for point in data_prediction]
+
+    cmap = 'cool'
+
+    scatter = ax.scatter(x, y, z, c=val, cmap=cmap)
+    colorbar = plt.colorbar(ScalarMappable(cmap=cmap), ax=ax, shrink=0.5)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.tick_params(axis='x', labelsize=10)
+    ax.tick_params(axis='y', labelsize=10)
+    ax.tick_params(axis='z', labelsize=10)
+    ax.set_title("Prediction of Test Set")
+
+    # plt.show()
+    plt.tight_layout()
+    # plt.subplots_adjust(right=0.8)
+    plt.savefig(save_path, dpi=400)
+    plt.close()
+
+
+def one_time_draw_3d_points_from_txt(txt_path, save_path):
+    with open(txt_path, "r") as f:
+        lines = f.readlines()
+    lines = [line for line in lines if "," in line and "x" not in line]
+    data_truth = []
+    data_prediction = []
+    for one_line in lines:
+        parts = one_line.split(",")
+        data_truth.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])))
+        data_prediction.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[5])))
+    print("data_truth:")
+    print(data_truth)
+    print("data_prediction:")
+    print(data_prediction)
+    # draw_3d_points(data_truth, data_prediction, save_path)
+
+
+# def one_time_draw_3d_points_from_txt(txt_path, save_path):
+#     with open(txt_path, "r") as f:
+#         lines = f.readlines()
+#     lines = [line for line in lines if "," in line and "x" not in line]
+#     data_truth = []
+#     data_prediction = []
+#     for one_line in lines:
+#         parts = one_line.split(",")
+#         data_truth.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])))
+#         data_prediction.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[5])))
+#     print("data_truth:")
+#     print(data_truth)
+#     print("data_prediction:")
+#     print(data_prediction)
+#     # draw_3d_points(data_truth, data_prediction, save_path)
+
+
 
 if __name__ == "__main__":
     # a = np.asarray([1.0, 2.0, 3.0])
-    a = torch.tensor([1.0, 2.0, 3.0])
-    print(my_min_max(a))
+    # a = torch.tensor([1.0, 2.0, 3.0])
+    # print(my_min_max(a))
+    # data = [(1, 2, 3, 0), (4, 5, 6, 1), (7, 8, 9, 0)]
+    # draw_3d_points(data)
+    one_time_draw_3d_points_from_txt("test/test.txt", "test/comparison.png")
