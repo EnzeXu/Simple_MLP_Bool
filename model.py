@@ -101,7 +101,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
         if valid_loss < min_val_loss:
             min_val_loss = valid_loss
             best_epoch = epoch
-            torch.save(model.state_dict(), main_path + "saves/model_{}.pt".format(record_timestring_start))
+            torch.save(model.state_dict(), main_path + "saves/model_{}_best.pt".format(record_timestring_start))
         # test_loss, test_loss_rmse = test(model, test_loader, device)
         train_loss_record.append(train_loss)
         valid_loss_record.append(valid_loss)
@@ -119,7 +119,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
             record_time_epoch_step = record_time_epoch_step_tmp
             print(info_epoch + info_best + info_extended)
 
-            # print("model saved to {}".format(main_path + "saves/model_{}.pt".format(timestring)))
+            # print("model saved to {}".format(main_path + "saves/model_{}_best.pt".format(timestring)))
         if epoch % 50 == 0 or epoch == epochs:
             torch.save(model.state_dict(), main_path + "saves/model_{}_last.pt".format(record_timestring_start))
             generate_output(main_path + "saves/model_{}_best.pt".format(record_timestring_start),
@@ -163,7 +163,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
         os.makedirs(save_comparison_folder)
     save_comparison_path = f"{save_comparison_folder}/val_{record_timestring_start}.txt"
 
-    model.load_state_dict(torch.load(main_path + "saves/model_{}.pt".format(record_timestring_start)))
+    model.load_state_dict(torch.load(main_path + "saves/model_{}_best.pt".format(record_timestring_start)))
     with open(save_comparison_path, "a") as f:
         row_id = 0
         with torch.no_grad():
