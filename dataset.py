@@ -1,3 +1,5 @@
+import os
+
 from torch.utils.data import Dataset, DataLoader
 # from const import *
 # from sklearn.preprocessing import MinMaxScaler
@@ -50,9 +52,14 @@ class MyDataset(Dataset):
         y = self.y_data[idx]
         return x, y
 
-def one_time_generate_dataset():
+def one_time_generate_dataset(source_path, filter):
     t0 = time.time()
-    dataset = MyDataset("data/dataset_0_1_2_v0604.csv")
+    source_path = source_path.replace(".csv", f"_{filter}.csv")
+    save_folder_path = f"processed/filter={filter}/"
+    if not os.path.exists(save_folder_path):
+        os.makedirs(save_folder_path)
+    dataset = MyDataset(source_path)
+
 
     print(dataset.x_data[0], dataset.y_data[0])
 
@@ -61,24 +68,28 @@ def one_time_generate_dataset():
     print(len(train_idxs), len(val_idxs))
     train_dataset = torch.utils.data.Subset(dataset, train_idxs)
     val_dataset = torch.utils.data.Subset(dataset, val_idxs)
-    with open("processed/train_idx.pkl", "wb") as f:
+    with open(save_folder_path + "train_idx.pkl", "wb") as f:
         pickle.dump(train_idxs, f)
-    with open("processed/val_idx.pkl", "wb") as f:
+    with open(save_folder_path + "val_idx.pkl", "wb") as f:
         pickle.dump(val_idxs, f)
 
-    with open("processed/x_raw.pkl", "wb") as f:
+    with open(save_folder_path + "x_raw.pkl", "wb") as f:
         pickle.dump(dataset.x_data, f)
-    with open("processed/y_raw.pkl", "wb") as f:
+    with open(save_folder_path + "y_raw.pkl", "wb") as f:
         pickle.dump(dataset.y_data, f)
 
-    with open("processed/all.pkl", "wb") as f:
+    with open(save_folder_path + "all.pkl", "wb") as f:
         pickle.dump(dataset, f)
-    with open("processed/train.pkl", "wb") as f:
+    with open(save_folder_path + "train.pkl", "wb") as f:
         pickle.dump(train_dataset, f)
-    with open("processed/valid.pkl", "wb") as f:
+    with open(save_folder_path + "valid.pkl", "wb") as f:
         pickle.dump(val_dataset, f)
+    print(f"saved to {save_folder_path}")
     print("cost {0:.6f} min".format((time.time() - t0) / 60.0))
 
 
 if __name__ == "__main__":
-    one_time_generate_dataset()
+    one_time_generate_dataset("data/dataset_0_1_2_v0604.csv", "all")
+    one_time_generate_dataset("data/dataset_0_1_2_v0604.csv", "200")
+    one_time_generate_dataset("data/dataset_0_1_2_v0604.csv", "100")
+

@@ -15,6 +15,7 @@ from utils import get_now_string, decode, calculate_scores
 from tqdm import tqdm
 from dataset import MyDataset
 import os
+import argparse
 
 
 class MyModel(nn.Module):
@@ -84,7 +85,7 @@ def validate(model, dataloader, criterion, device):
 #     return running_loss / len(dataloader), math.sqrt(running_loss / len(dataloader))
 
 
-def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path):
+def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path, opt):
     train_loss_record = []
     valid_loss_record = []
     min_val_loss = float('Inf')
@@ -122,9 +123,9 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
             # print("model saved to {}".format(main_path + "saves/model_{}_best.pt".format(timestring)))
         if epoch % 50 == 0 or epoch == epochs:
             torch.save(model.state_dict(), main_path + "saves/model_{}_last.pt".format(record_timestring_start))
-            generate_output(main_path + "saves/model_{}_best.pt".format(record_timestring_start),
+            generate_output(main_path + "saves/model_{}_best.pt".format(record_timestring_start), opt,
                             record_timestring_start, device, "best")
-            generate_output(main_path + "saves/model_{}_last.pt".format(record_timestring_start),
+            generate_output(main_path + "saves/model_{}_last.pt".format(record_timestring_start), opt,
                             record_timestring_start, device, "last")
 
         scheduler.step()
@@ -142,7 +143,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
     if not os.path.exists(record_folder_path):
         os.makedirs(record_folder_path)
     with open(record_folder_path + "record.csv", "a") as f:
-        f.write("{0},{1},{2},{3:.2f},{4},{5},{6:.9f},{7:.9f},{8},{9:.9f},{10},{11}\n".format(
+        f.write("{0},{1},{2},{3:.2f},{4},{5},{6:.9f},{7:.9f},{8},{9:.9f},{10},{11},{12}\n".format(
             # func_name,timestring_start,timestring_end,time_cost_min,epochs,layer,activation,layer_size,lr,lr_end,scheduler,dropout,best_epoch,min_loss
             "Simple_MLP",  # 0
             record_timestring_start,  # 1
@@ -156,6 +157,7 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
             min_val_loss,  # 9
             model.x_dim,  # 10
             model.y_dim,  # 11
+            opt.filter,  # 12
         ))
 
     save_comparison_folder = "./record/comparison/"
@@ -183,7 +185,6 @@ def run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs
                         " ".join([str("{0:.12f}".format(item)) for item in outputs[i]]),
                     ))
     print("saved comparison to {}".format(save_comparison_path))
-    # generate_output(main_path + "saves/model_{}.pt".format(record_timestring_start), record_timestring_start, device)
 
 def relative_loss(prediction, target):
     criterion = nn.MSELoss(reduction="none")
@@ -193,13 +194,13 @@ def relative_loss(prediction, target):
     return errors
 
 
-def generate_output(pt_path, timestring=None, device=None, pt_type="test"):
+def generate_output(pt_path, opt, timestring=None, device=None, pt_type="test"):
     main_path = "./"
-    with open(main_path + "processed/all.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/all.pkl", "rb") as f:
         dataset = pickle.load(f)
-    with open(main_path + "processed/valid.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/valid.pkl", "rb") as f:
         val_dataset = pickle.load(f)
-    with open(main_path + "processed/train.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/train.pkl", "rb") as f:
         train_dataset = pickle.load(f)
     val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
@@ -230,19 +231,19 @@ def generate_output(pt_path, timestring=None, device=None, pt_type="test"):
     # x_data_raw = x_df.values
     # y_data_raw = y_df.values
 
-    with open("processed/x_raw.pkl", "rb") as f:
+    with open(f"processed/filter={opt.filter}/x_raw.pkl", "rb") as f:
         x_data_raw = pickle.load(f)
-    with open("processed/y_raw.pkl", "rb") as f:
+    with open(f"processed/filter={opt.filter}/y_raw.pkl", "rb") as f:
         y_data_raw = pickle.load(f)
 
 
-    with open("processed/val_idx.pkl", "rb") as f:
+    with open(f"processed/filter={opt.filter}/val_idx.pkl", "rb") as f:
         val_idx = pickle.load(f)
-    with open("processed/train_idx.pkl", "rb") as f:
+    with open(f"processed/filter={opt.filter}/train_idx.pkl", "rb") as f:
         train_idx = pickle.load(f)
 
 
-    with open("processed/record_min_max.pkl", "rb") as f:
+    with open(f"processed/filter={opt.filter}/record_min_max.pkl", "rb") as f:
         record = pickle.load(f)
     x1_min = record["x1_min"]
     x1_max = record["x1_max"]
@@ -346,12 +347,17 @@ def generate_output(pt_path, timestring=None, device=None, pt_type="test"):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--filter", type=str, default="all", help="filter")
+    parser.add_argument("--epoch", type=int, default=1000, help="epoch")
+    opt = parser.parse_args()
+
     main_path = "./"
-    with open(main_path + "processed/all.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/all.pkl", "rb") as f:
         dataset = pickle.load(f)
-    with open(main_path + "processed/train.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/train.pkl", "rb") as f:
         train_dataset = pickle.load(f)
-    with open(main_path + "processed/valid.pkl", "rb") as f:
+    with open(main_path + f"processed/filter={opt.filter}/valid.pkl", "rb") as f:
         val_dataset = pickle.load(f)
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
@@ -368,7 +374,7 @@ if __name__ == "__main__":
 
     model = MyModel(x_dim=dataset.x_dim, y_dim=dataset.y_dim).to(device)
     # model.load_state_dict(torch.load(main_path + "saves/model_20230228_211049_069082.pt"))
-    epochs = 1000
+    epochs = opt.epoch
     criterion = nn.MSELoss()  #  relative_loss  # nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda e: 1 / (e / (0.01 * epochs) + 1))
@@ -377,9 +383,9 @@ if __name__ == "__main__":
     wandb_flag = True
     if wandb_flag:
         with wandb.init(project='Simple_MLP_Bool', name='test'):
-            run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path)
+            run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path, opt)
     else:
-         run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path)
+         run(model, train_loader, val_loader, criterion, optimizer, scheduler, epochs, device, main_path, opt)
 
     # input = torch.tensor([1.01, 202.0])
     # target = torch.tensor([1.0, 200.0])
