@@ -70,7 +70,7 @@ def calculate_scores(truth_list, prediction_list, f=None):
         f.write("F-score = 2 * (precision * recall) / (precision + recall) = {:.4f}\n".format(f_score))
 
 
-def draw_3d_points(data_truth, data_prediction, data_error, data_error_remarkable, save_path, title=None):
+def draw_3d_points(data_truth, data_prediction, data_error, save_path, title=None):
     # data_truth = data_truth
     # data_prediction = data_prediction
     np.random.shuffle(data_truth)
@@ -88,15 +88,22 @@ def draw_3d_points(data_truth, data_prediction, data_error, data_error_remarkabl
     z_label = "k_smzx"
 
     ax1 = fig.add_subplot(221, projection='3d')
-    x = [point[0] for point in data_truth]
-    y = [point[1] for point in data_truth]
-    z = [point[2] for point in data_truth]
-    val = [point[3] for point in data_truth]
 
-    scatter = ax1.scatter(x, y, z, label=val, alpha=0.4)
-    #  colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=truth_y_min, vmax=truth_y_max)), ax=ax1, shrink=0.5)
+    data_truth_0 = data_truth[data_truth[:, -1] == 0]
+    data_truth_1 = data_truth[data_truth[:, -1] == 1]
 
-    ax1.legend()
+    x0 = [point[0] for point in data_truth_0]
+    y0 = [point[1] for point in data_truth_0]
+    z0 = [point[2] for point in data_truth_0]
+
+    x1 = [point[0] for point in data_truth_1]
+    y1 = [point[1] for point in data_truth_1]
+    z1 = [point[2] for point in data_truth_1]
+
+    scatter = ax1.scatter(x0, y0, z0, c="grey", label="Non-osci", alpha=0.2)
+    scatter = ax1.scatter(x1, y1, z1, c="red", label="Osci", alpha=0.2)
+
+    ax1.legend(fontsize=20)
 
     ax1.set_xlabel(x_label)
     ax1.set_ylabel(y_label)
@@ -108,15 +115,22 @@ def draw_3d_points(data_truth, data_prediction, data_error, data_error_remarkabl
 
 
     ax2 = fig.add_subplot(222, projection='3d')
-    x = [point[0] for point in data_prediction]
-    y = [point[1] for point in data_prediction]
-    z = [point[2] for point in data_prediction]
-    val = [point[3] for point in data_prediction]
 
-    scatter = ax2.scatter(x, y, z, c=val, alpha=0.4)
-    #  colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=truth_y_min, vmax=truth_y_max)), ax=ax2, shrink=0.5)
+    data_prediction_0 = data_prediction[data_prediction[:, -1] == 0]
+    data_prediction_1 = data_prediction[data_prediction[:, -1] == 1]
 
-    ax2.legend()
+    x0 = [point[0] for point in data_prediction_0]
+    y0 = [point[1] for point in data_prediction_0]
+    z0 = [point[2] for point in data_prediction_0]
+
+    x1 = [point[0] for point in data_prediction_1]
+    y1 = [point[1] for point in data_prediction_1]
+    z1 = [point[2] for point in data_prediction_1]
+
+    scatter = ax2.scatter(x0, y0, z0, c="grey", label="Non-osci", alpha=0.2)
+    scatter = ax2.scatter(x1, y1, z1, c="red", label="Osci", alpha=0.2)
+
+    ax2.legend(fontsize=20)
 
     ax2.set_xlabel(x_label)
     ax2.set_ylabel(y_label)
@@ -126,24 +140,30 @@ def draw_3d_points(data_truth, data_prediction, data_error, data_error_remarkabl
     ax2.tick_params(axis='z', labelsize=10)
     ax2.set_title("Prediction of CYCLE_TIME", fontsize=20)
 
-    # ax3 = fig.add_subplot(223, projection='3d')
-    # x = [point[0] for point in data_error]
-    # y = [point[1] for point in data_error]
-    # z = [point[2] for point in data_error]
-    # val = [point[3] for point in data_error]
-    #
-    # cmap = 'coolwarm'
-    #
-    # scatter = ax3.scatter(x, y, z, c=val, cmap=cmap, alpha=0.4)
-    # colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=error_y_min, vmax=error_y_max)), ax=ax3, shrink=0.5)
-    #
-    # ax3.set_xlabel(x_label)
-    # ax3.set_ylabel(y_label)
-    # ax3.set_zlabel(z_label)
-    # ax3.tick_params(axis='x', labelsize=10)
-    # ax3.tick_params(axis='y', labelsize=10)
-    # ax3.tick_params(axis='z', labelsize=10)
-    # ax3.set_title("Error Distribution", fontsize=20)
+    ax3 = fig.add_subplot(223, projection='3d')
+
+    data_error_0 = data_error[data_error[:, -1] == 0]
+    data_error_1 = data_error[data_error[:, -1] == 1]
+
+    x0 = [point[0] for point in data_error_0]
+    y0 = [point[1] for point in data_error_0]
+    z0 = [point[2] for point in data_error_0]
+    x1 = [point[0] for point in data_error_1]
+    y1 = [point[1] for point in data_error_1]
+    z1 = [point[2] for point in data_error_1]
+
+    scatter = ax3.scatter(x0, y0, z0, c="purple", label=f"Truth=0 & Pred=1 ({len(data_error_0)})", alpha=0.5)
+    scatter = ax3.scatter(x1, y1, z1, c="lime", label=f"Truth=1 & Pred=0 ({len(data_error_1)})", alpha=0.5)
+
+    ax3.legend(fontsize=20)
+
+    ax3.set_xlabel(x_label)
+    ax3.set_ylabel(y_label)
+    ax3.set_zlabel(z_label)
+    ax3.tick_params(axis='x', labelsize=10)
+    ax3.tick_params(axis='y', labelsize=10)
+    ax3.tick_params(axis='z', labelsize=10)
+    ax3.set_title(f"Error Cases ($n_{{E}}={len(data_error)}$)", fontsize=20)
     #
     # ax4 = fig.add_subplot(224, projection='3d')
     # x = [point[0] for point in data_error_remarkable]
@@ -179,8 +199,41 @@ def draw_3d_points(data_truth, data_prediction, data_error, data_error_remarkabl
     # plot_value_distribution(data_error[:, -1], save_path=save_path.replace(".png", "_distribution.png"))
 
 
+def plot_value_distribution_bool(data, save_path):
+    fig = plt.figure(figsize=(24, 6))
+    bin_edges = np.arange(0.0, 2.0, 0.05)
 
-def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None):
+    # Calculate the histogram of the data using the defined bins
+    hist, _ = np.histogram(data, bins=bin_edges)
+
+    # Calculate the frequencies as the relative count in each bin
+    frequencies = hist / len(data)
+
+    ax = fig.add_subplot(111)
+
+    # Plot the bars with the frequencies
+    bars = ax.bar(bin_edges[:-1], frequencies, width=0.05, align='edge', color="orange")
+
+    ax.set_xlabel('Relative Error')
+    ax.set_ylabel('Frequency')
+    ax.set_title('Error Distribution')
+
+    # Set x-axis ticks to match the desired range [0.1, 0.2, ..., 0.9, 1.0]
+    x_ticks = np.arange(0.0, 2.0, 0.05)
+    plt.xticks(x_ticks)
+
+    # Add count labels on top of each bar
+    for i, bar in enumerate(bars):
+        height = bar.get_height()
+        ax.annotate(f'{hist[i]:d}', xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3), textcoords='offset points',
+                    ha='center', va='bottom')
+
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+
+
+def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None, log_flag=False):
     with open(txt_path, "r") as f:
         lines = f.readlines()
     lines = [line for line in lines if "," in line and "x" not in line]
@@ -189,6 +242,10 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None):
     data_error = []
     for one_line in lines[:]:
         parts = one_line.split(",")
+        if log_flag:
+            parts[1] = np.log(float(parts[1]))
+            parts[2] = np.log(float(parts[2]))
+            parts[3] = np.log(float(parts[3]))
         data_truth.append((float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])))
         data_prediction.append((float(parts[1]), float(parts[2]), float(parts[3]), int(parts[5])))
         if int(parts[4]) != int(parts[5]):
@@ -206,21 +263,6 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None):
     print(f"saved \"{title}\" to {save_path}")
 
 
-# def one_time_draw_3d_points_from_txt(txt_path, save_path):
-#     with open(txt_path, "r") as f:
-#         lines = f.readlines()
-#     lines = [line for line in lines if "," in line and "x" not in line]
-#     data_truth = []
-#     data_prediction = []
-#     for one_line in lines:
-#         parts = one_line.split(",")
-#         data_truth.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[4])))
-#         data_prediction.append((float(parts[1]), float(parts[2]), float(parts[3]), float(parts[5])))
-#     print("data_truth:")
-#     print(data_truth)
-#     print("data_prediction:")
-#     print(data_prediction)
-#     # draw_3d_points(data_truth, data_prediction, save_path)
 
 
 
@@ -230,4 +272,16 @@ if __name__ == "__main__":
     # print(my_min_max(a))
     # data = [(1, 2, 3, 0), (4, 5, 6, 1), (7, 8, 9, 0)]
     # draw_3d_points(data)
-    one_time_draw_3d_points_from_txt("test/test.txt", "test/comparison.png")
+    timestring = "20230603_073335_114703"  # "20230603_044727_785177"
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_train.txt",
+                                     f"test/comparison_{timestring}_best_train_log.png",
+                                     title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_val.txt",
+                                     f"test/comparison_{timestring}_best_test_log.png",
+                                     title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
+                                     f"test/comparison_{timestring}_last_train_log.png",
+                                     title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
+                                     f"test/comparison_{timestring}_last_test_log.png",
+                                     title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
