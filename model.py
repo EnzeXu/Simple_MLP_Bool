@@ -206,7 +206,7 @@ def generate_output(pt_path, opt, timestring=None, device=None, pt_type="test"):
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
 
     if not device:
-        gpu_id = 0
+        gpu_id = opt.gpu_id
         use_cuda = torch.cuda.is_available()
         if use_cuda:
             device = torch.device('cuda', gpu_id)
@@ -350,6 +350,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--filter", type=str, default="all", help="filter")
     parser.add_argument("--epoch", type=int, default=1000, help="epoch")
+    parser.add_argument("--gpu_id", type=int, default=0, help="gpu_id")
     opt = parser.parse_args()
 
     main_path = "./"
@@ -364,7 +365,7 @@ if __name__ == "__main__":
     val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    gpu_id = 0
+    gpu_id = opt.gpu_id
     use_cuda = torch.cuda.is_available()
     if use_cuda:
         device = torch.device('cuda', gpu_id)
