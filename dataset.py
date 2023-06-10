@@ -18,7 +18,7 @@ from sklearn.model_selection import train_test_split
 from utils import my_min_max, decode
 
 class MyDataset(Dataset):
-    def __init__(self, path):
+    def __init__(self, path, filter):
         print(f"loading data from {path} ...")
         df = pd.read_csv(path, header=None)
 
@@ -37,7 +37,7 @@ class MyDataset(Dataset):
         record["x3_max"] = x3_max
         record["y_min"] = y_min
         record["y_max"] = y_max
-        with open("processed/record_min_max.pkl", "wb") as f:
+        with open(f"processed/filter={filter}/record_min_max.pkl", "wb") as f:
             pickle.dump(record, f)
         self.x_dim = self.x_data.shape[-1]
         self.y_dim = self.y_data.shape[-1]
@@ -58,7 +58,7 @@ def one_time_generate_dataset(source_path, filter):
     save_folder_path = f"processed/filter={filter}/"
     if not os.path.exists(save_folder_path):
         os.makedirs(save_folder_path)
-    dataset = MyDataset(source_path)
+    dataset = MyDataset(source_path, filter)
 
 
     print(dataset.x_data[0], dataset.y_data[0])
