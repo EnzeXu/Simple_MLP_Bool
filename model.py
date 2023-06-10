@@ -16,6 +16,7 @@ from tqdm import tqdm
 from dataset import MyDataset
 import os
 import argparse
+import json
 
 
 class MyModel(nn.Module):
@@ -352,6 +353,9 @@ if __name__ == "__main__":
     parser.add_argument("--epoch", type=int, default=1000, help="epoch")
     parser.add_argument("--gpu_id", type=int, default=0, help="gpu_id")
     opt = parser.parse_args()
+
+    opt_print = opt.__dict__.copy()
+    print(json.dumps(opt_print, indent=4))
 
     main_path = "./"
     with open(main_path + f"processed/filter={opt.filter}/all.pkl", "rb") as f:
