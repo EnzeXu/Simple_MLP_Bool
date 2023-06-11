@@ -240,6 +240,9 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None, log_f
     data_truth = []
     data_prediction = []
     data_error = []
+    data_2D_correct = []
+    data_2D_wrong = []
+    # data_2D_truth = []
     for one_line in lines[:]:
         parts = one_line.split(",")
         if log_flag:
@@ -247,15 +250,20 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None, log_f
             parts[2] = np.log(float(parts[2]))
             parts[3] = np.log(float(parts[3]))
         data_truth.append((float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])))
+        data_2D_correct.append((float(parts[1]), float(parts[2]), float(parts[3]), "correct"))
         data_prediction.append((float(parts[1]), float(parts[2]), float(parts[3]), int(parts[5])))
         if int(parts[4]) != int(parts[5]):
             data_error.append((float(parts[1]), float(parts[2]), float(parts[3]), int(parts[4])))
+            data_2D_wrong.append((float(parts[1]), float(parts[2]), float(parts[3]), "wrong"))
     # print("data_truth:")
     # print(data_truth)
     # print("data_prediction:")
     # print(data_prediction)
     # print("data_error:")
     # print(data_error)
+
+    draw_3_2d_points_bool(data_2D_correct, data_2D_wrong, data_truth, save_path.replace(".png", "_2D.png"))
+
     data_truth = np.asarray(data_truth)
     data_prediction = np.asarray(data_prediction)
     data_error = np.asarray(data_error)
@@ -306,39 +314,137 @@ def one_time_filter_data(data_path, filter_list):
         print(f"count_bad: {count_bad}")
 
 
-def one_time_draw_3_2d_points(data, save_path):
+def draw_3_2d_points(data_correct, data_wrong, data_truth, save_path):
+    fig, axes = plt.subplots(2, 3, figsize=(24, 14))
+
+    x_label = "k_hyz"
+    y_label = "k_pyx"
+    z_label = "k_smzx"
+
+    x_correct = np.array([item[0] for item in data_correct])
+    y_correct = np.array([item[1] for item in data_correct])
+    z_correct = np.array([item[2] for item in data_correct])
+
+
+    x_wrong = np.array([item[0] for item in data_wrong])
+    y_wrong = np.array([item[1] for item in data_wrong])
+    z_wrong = np.array([item[2] for item in data_wrong])
+
+
+    x_truth = np.array([item[0] for item in data_truth])
+    y_truth = np.array([item[1] for item in data_truth])
+    z_truth = np.array([item[2] for item in data_truth])
+    value_truth = np.array([item[3] for item in data_truth])
+
+    point_size = 5
+    alpha_level = 0.5
+
+    ax = axes[0][0]
+    ax.scatter(x_correct, y_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(x_wrong, y_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.legend()
+    ax.set_title('2D-XY: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
+
+    ax = axes[0][1]
+    ax.scatter(x_correct, z_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(x_wrong, z_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(z_label)
+    ax.legend()
+    ax.set_title('2D-XZ: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
+
+    ax = axes[0][2]
+    ax.scatter(y_correct, z_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(y_wrong, z_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
+    ax.set_xlabel(y_label)
+    ax.set_ylabel(z_label)
+    ax.legend()
+    ax.set_title('2D-YZ: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
+
+    cmap = "hot"
+
+    ax = axes[1][0]
+    sc = ax.scatter(x_truth, y_truth, c=value_truth, alpha=alpha_level, s=point_size, cmap=cmap)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title('2D-XY: Truth of Circle Time')
+    colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=min(value_truth), vmax=max(value_truth))), ax=ax, shrink=0.5)
+
+    ax = axes[1][1]
+    sc = ax.scatter(x_truth, z_truth, c=value_truth, alpha=alpha_level, s=point_size, cmap=cmap)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(z_label)
+    ax.set_title('2D-XZ: Truth of Circle Time')
+    colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=min(value_truth), vmax=max(value_truth))), ax=ax, shrink=0.5)
+
+    ax = axes[1][2]
+    sc = ax.scatter(y_truth, z_truth, c=value_truth, alpha=alpha_level, s=point_size, cmap=cmap)
+    ax.set_xlabel(y_label)
+    ax.set_ylabel(z_label)
+    ax.set_title('2D-YZ: Truth of Circle Time')
+    colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=min(value_truth), vmax=max(value_truth))), ax=ax, shrink=0.5)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+
+
+def draw_3_2d_points_bool(data_correct, data_wrong, data_truth, save_path):
     fig, axes = plt.subplots(1, 3, figsize=(24, 7))
 
     x_label = "k_hyz"
     y_label = "k_pyx"
     z_label = "k_smzx"
 
-    # Extract x, y, z, and value from the data
-    x = np.array([item[0] for item in data])
-    y = np.array([item[1] for item in data])
-    z = np.array([item[2] for item in data])
-    value = np.array([item[3] for item in data])
+    x_correct = np.array([item[0] for item in data_correct])
+    y_correct = np.array([item[1] for item in data_correct])
+    z_correct = np.array([item[2] for item in data_correct])
+
+
+    x_wrong = np.array([item[0] for item in data_wrong])
+    y_wrong = np.array([item[1] for item in data_wrong])
+    z_wrong = np.array([item[2] for item in data_wrong])
+
+
+    x_truth = np.array([item[0] for item in data_truth])
+    y_truth = np.array([item[1] for item in data_truth])
+    z_truth = np.array([item[2] for item in data_truth])
+    value_truth = np.array([item[3] for item in data_truth])
+
+    point_size = 5
+    alpha_level = 0.5
 
     ax = axes[0]
-    sc = ax.scatter(x, y, c=value, cmap='hot')
+    ax.scatter(x_correct, y_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(x_wrong, y_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
-    # ax.set_title('(X, Y, Value)')
-    fig.colorbar(sc, ax=ax)
+    ax.legend()
+    ax.set_title('2D-XY: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
 
     ax = axes[1]
-    sc = ax.scatter(x, z, c=value, cmap='hot')
+    ax.scatter(x_correct, z_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(x_wrong, z_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
     ax.set_xlabel(x_label)
     ax.set_ylabel(z_label)
-    # ax.set_title('(X, Z, Value)')
-    fig.colorbar(sc, ax=ax)
+    ax.legend()
+    ax.set_title('2D-XZ: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
 
     ax = axes[2]
-    sc = ax.scatter(y, z, c=value, cmap='hot')
+    ax.scatter(y_correct, z_correct, label="Correct", alpha=alpha_level, c="lime", s=point_size)
+    ax.scatter(y_wrong, z_wrong, label="Wrong", alpha=alpha_level, c="r", s=point_size)
     ax.set_xlabel(y_label)
     ax.set_ylabel(z_label)
-    # ax.set_title('(Y, Z, Value)')
-    fig.colorbar(sc, ax=ax)
+    ax.legend()
+    ax.set_title('2D-YZ: Correct & Wrong Distribution')
+    # fig.colorbar(sc, ax=ax)
 
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
@@ -352,26 +458,29 @@ if __name__ == "__main__":
     # print(my_min_max(a))
     # data = [(1, 2, 3, 0), (4, 5, 6, 1), (7, 8, 9, 0)]
     # draw_3d_points(data)
-    # timestring = "20230603_073335_114703"  # "20230603_044727_785177"
+    timestring = "20230610_101237_031621"  # "20230603_073335_114703"  # "20230603_044727_785177"
     # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_train.txt",
     #                                  f"test/comparison_{timestring}_best_train_log.png",
     #                                  title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
     # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_val.txt",
     #                                  f"test/comparison_{timestring}_best_test_log.png",
     #                                  title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
-    # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
-    #                                  f"test/comparison_{timestring}_last_train_log.png",
-    #                                  title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
-    # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
-    #                                  f"test/comparison_{timestring}_last_test_log.png",
-    #                                  title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
+                                     f"test/comparison_{timestring}_last_train.png",
+                                     title="Results of the Train Set (n=99299) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
+                                     f"test/comparison_{timestring}_last_test.png",
+                                     title="Results of the Test Set (n=24825) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+
+
+
     # with open("data/debug.txt", "w") as f:
     #     pass
-    one_time_filter_data("data/dataset_0_1_2_v0604.csv", [999999, 200, 100])
-    data = [[1, 3, 4, 98],
-            [2, 10, 8, 87],
-            [5, 7, 2, 65],
-            [3, 6, 9, 42],
-            [8, 2, 1, 76],
-            [4, 9, 7, 54]]
+    # one_time_filter_data("data/dataset_0_1_2_v0604.csv", [999999, 200, 100])
+    # data = [[1, 3, 4, 98],
+    #         [2, 10, 8, 87],
+    #         [5, 7, 2, 65],
+    #         [3, 6, 9, 42],
+    #         [8, 2, 1, 76],
+    #         [4, 9, 7, 54]]
     # one_time_draw_3_2d_points(data, "test/new_test.png")
