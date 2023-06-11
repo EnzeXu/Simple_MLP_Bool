@@ -289,10 +289,12 @@ def one_time_filter_data(data_path, filter_list):
                 f_write.write(one_line)
             elif c1 == "inf" or c2 == "inf" or c3 == "inf":
                 count_bad += 1
+                # print(one_line, end="")
             else:
                 c1_f, c2_f, c3_f = float(c1), float(c2), float(c3)
                 if max(c1_f, c2_f, c3_f) - min(c1_f, c2_f, c3_f) > 5:
                     count_bad += 1
+                    # print(one_line, end="")
                 else:
                     count_normal += 1
                     if c1_f < one_filter:
@@ -304,7 +306,43 @@ def one_time_filter_data(data_path, filter_list):
         print(f"count_bad: {count_bad}")
 
 
+def one_time_draw_3_2d_points(data, save_path):
+    fig, axes = plt.subplots(1, 3, figsize=(24, 7))
 
+    x_label = "k_hyz"
+    y_label = "k_pyx"
+    z_label = "k_smzx"
+
+    # Extract x, y, z, and value from the data
+    x = np.array([item[0] for item in data])
+    y = np.array([item[1] for item in data])
+    z = np.array([item[2] for item in data])
+    value = np.array([item[3] for item in data])
+
+    ax = axes[0]
+    sc = ax.scatter(x, y, c=value, cmap='hot')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    # ax.set_title('(X, Y, Value)')
+    fig.colorbar(sc, ax=ax)
+
+    ax = axes[1]
+    sc = ax.scatter(x, z, c=value, cmap='hot')
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(z_label)
+    # ax.set_title('(X, Z, Value)')
+    fig.colorbar(sc, ax=ax)
+
+    ax = axes[2]
+    sc = ax.scatter(y, z, c=value, cmap='hot')
+    ax.set_xlabel(y_label)
+    ax.set_ylabel(z_label)
+    # ax.set_title('(Y, Z, Value)')
+    fig.colorbar(sc, ax=ax)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close()
 
 
 
@@ -330,3 +368,10 @@ if __name__ == "__main__":
     # with open("data/debug.txt", "w") as f:
     #     pass
     one_time_filter_data("data/dataset_0_1_2_v0604.csv", [999999, 200, 100])
+    data = [[1, 3, 4, 98],
+            [2, 10, 8, 87],
+            [5, 7, 2, 65],
+            [3, 6, 9, 42],
+            [8, 2, 1, 76],
+            [4, 9, 7, 54]]
+    # one_time_draw_3_2d_points(data, "test/new_test.png")
