@@ -40,7 +40,7 @@ class MyDataset(Dataset):
             record["x3_min"] = x3_min
             record["x3_max"] = x3_max
         else:  # for 2->1
-            self.x_data = torch.tensor(df.values, dtype=torch.float64)[:, :3]
+            self.x_data = torch.tensor(df.values, dtype=torch.float64)[:, :2]
             self.y_data = torch.tensor(df.values, dtype=torch.float64)[:, 5:6]
             self.x_data[:, 0:1], x1_min, x1_max = my_min_max(self.x_data[:, 0:1])
             self.x_data[:, 1:2], x2_min, x2_max = my_min_max(self.x_data[:, 1:2])
