@@ -273,10 +273,62 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None, log_f
     print(f"saved \"{title}\" to {save_path}")
 
 
+# def one_time_filter_data(data_path, filter_list):
+#     with open(data_path, "r") as f:
+#         lines = f.readlines()
+#     lines = [line for line in lines if len(line) > 10 and "k_" not in line]
+#     print(f"Initial: all {len(lines)} lines")
+#
+#     for one_filter in filter_list:
+#         save_path = data_path.replace(".csv", f"_{'all' if one_filter > 1000 else one_filter}.csv")
+#         # with open(save_path, "w") as f_tmp:
+#         #     pass
+#         f_write = open(save_path, "w")
+#
+#         count_inf = 0
+#         count_normal = 0
+#         count_normal_remain = 0
+#         count_bad = 0
+#
+#         print(f"# filter: <{one_filter} or inf")
+#         for one_line in lines:
+#             parts = one_line.split(",")
+#             c1, c2, c3 = parts[3], parts[4], parts[5]
+#             if c1 == c2 == c3 == "inf":
+#                 count_inf += 1
+#                 f_write.write(one_line)
+#             elif c1 == "inf" or c2 == "inf" or c3 == "inf":
+#                 count_bad += 1
+#                 # print(one_line, end="")
+#             else:
+#                 c1_f, c2_f, c3_f = float(c1), float(c2), float(c3)
+#                 if max(c1_f, c2_f, c3_f) - min(c1_f, c2_f, c3_f) > 5:
+#                     count_bad += 1
+#                     # print(one_line, end="")
+#                 else:
+#                     count_normal += 1
+#                     if c1_f < one_filter:
+#                         count_normal_remain += 1
+#                         f_write.write(one_line)
+#         f_write.close()
+#         print(f"count_inf: {count_inf}")
+#         print(f"count_normal: {count_normal} ({count_normal_remain} remain for matching \"<{one_filter}\"))")
+#         print(f"count_bad: {count_bad}")
+
+
 def one_time_filter_data(data_path, filter_list):
     with open(data_path, "r") as f:
         lines = f.readlines()
     lines = [line for line in lines if len(line) > 10 and "k_" not in line]
+
+    n_col = len(lines[0].split(","))
+    assert n_col in [6, 7]
+    if n_col == 7:
+        y_start_col = 3
+    else:
+        y_start_col = 2
+    print(f"# n_col = {n_col}, so y_start_col = {y_start_col}")
+
     print(f"Initial: all {len(lines)} lines")
 
     for one_filter in filter_list:
@@ -293,7 +345,7 @@ def one_time_filter_data(data_path, filter_list):
         print(f"# filter: <{one_filter} or inf")
         for one_line in lines:
             parts = one_line.split(",")
-            c1, c2, c3 = parts[3], parts[4], parts[5]
+            c1, c2, c3 = parts[y_start_col], parts[y_start_col + 1], parts[y_start_col + 2]
             if c1 == c2 == c3 == "inf":
                 count_inf += 1
                 f_write.write(one_line)
@@ -485,7 +537,10 @@ if __name__ == "__main__":
 
     # with open("data/debug.txt", "w") as f:
     #     pass
-    one_time_filter_data("data/dataset_3_4_5_v0604.csv", [999999, 200, 100])
+
+    # one_time_filter_data("data/dataset_3_4_5_v0604.csv", [999999, 200, 100])
+    one_time_filter_data("data/dataset_0_1_v0618.csv", [999999, 200, 100])
+
     # data = [[1, 3, 4, 98],
     #         [2, 10, 8, 87],
     #         [5, 7, 2, 65],
