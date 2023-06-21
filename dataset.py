@@ -111,7 +111,11 @@ if __name__ == "__main__":
     # one_time_generate_dataset("data/dataset_0_1_2_v0604.csv", "200")
     # one_time_generate_dataset("data/dataset_0_1_2_v0604.csv", "100")
 
-    one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "all")
-    one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "200")
-    one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "100")
+    # one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "all")
+    # one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "200")
+    # one_time_generate_dataset("data/dataset_3_4_5_v0604.csv", "100")
+
+    one_time_generate_dataset("data/dataset_0_1_v0618.csv", "all")
+    one_time_generate_dataset("data/dataset_0_1_v0618.csv", "200")
+    one_time_generate_dataset("data/dataset_0_1_v0618.csv", "100")
 
