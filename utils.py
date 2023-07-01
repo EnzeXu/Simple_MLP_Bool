@@ -488,7 +488,7 @@ def one_time_filter_data(data_path, filter_list):
     lines = [line for line in lines if len(line) > 10 and "k_" not in line]
 
     n_col = len(lines[0].split(","))
-    assert n_col in [6, 7, 11]
+    assert n_col in [6, 7, 11], f"n_col should be in [6,7,11], but {n_col} was found in row '{lines[0]}'"
     if n_col == 7:
         y_start_col = 3
     elif n_col == 6:
