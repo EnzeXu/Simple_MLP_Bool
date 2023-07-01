@@ -485,7 +485,7 @@ def one_time_draw_2d_points_from_txt_bool(txt_path, save_path, title=None, log_f
 def one_time_filter_data(data_path, filter_list):
     with open(data_path, "r") as f:
         lines = f.readlines()
-    lines = [line for line in lines if len(line) > 10 and "k_" not in line]
+    lines = [line for line in lines if len(line) > 10 and "k_" not in line and "CYCLE_TIME" not in line]
 
     n_col = len(lines[0].split(","))
     assert n_col in [6, 7, 11], f"n_col should be in [6,7,11], but {n_col} was found in row '{lines[0]}'"
