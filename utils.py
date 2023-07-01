@@ -488,6 +488,7 @@ def one_time_filter_data(data_path, filter_list):
     lines = [line for line in lines if len(line) > 10 and "k_" not in line and "CYCLE_TIME" not in line]
 
     n_col = len(lines[0].split(","))
+    print(f"n_col={n_col}, lines[0]={lines[0]}")
     assert n_col in [6, 7, 11], "n_col should be in [6,7,11], but {} was found in row '{}'".format(n_col, lines[0])
     if n_col == 7:
         y_start_col = 3
