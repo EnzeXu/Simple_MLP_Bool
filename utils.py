@@ -715,7 +715,9 @@ if __name__ == "__main__":
 
     # one_time_filter_data("data/dataset_3_4_5_v0604.csv", [999999, 200, 100])
     # one_time_filter_data("data/dataset_0_1_v0618.csv", [999999, 200, 100])
-    one_time_filter_data("data/dataset_v0628_large.csv", [999999, 200, 100])
+    # one_time_filter_data("data/dataset_v0628_large.csv", [999999, 200, 100])
+
+    one_time_filter_data("data/dataset_v0628_small.csv", [999999, 200, 100])
 
     # data = [[1, 3, 4, 98],
     #         [2, 10, 8, 87],
