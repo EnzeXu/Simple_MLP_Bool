@@ -482,6 +482,7 @@ def one_time_draw_2d_points_from_txt_bool(txt_path, save_path, title=None, log_f
 #         print(f"count_bad: {count_bad}")
 
 
+
 def one_time_filter_data(data_path, filter_list):
     with open(data_path, "r") as f:
         lines = f.readlines()
