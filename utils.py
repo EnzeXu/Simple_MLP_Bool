@@ -488,11 +488,13 @@ def one_time_filter_data(data_path, filter_list):
     lines = [line for line in lines if len(line) > 10 and "k_" not in line]
 
     n_col = len(lines[0].split(","))
-    assert n_col in [6, 7]
+    assert n_col in [6, 7, 11]
     if n_col == 7:
         y_start_col = 3
-    else:
+    elif n_col == 6:
         y_start_col = 2
+    else:
+        y_start_col = 7
     print(f"# n_col = {n_col}, so y_start_col = {y_start_col}")
 
     print(f"Initial: all {len(lines)} lines")
@@ -684,24 +686,25 @@ if __name__ == "__main__":
     # print(my_min_max(a))
     # data = [(1, 2, 3, 0), (4, 5, 6, 1), (7, 8, 9, 0)]
     # draw_3d_points(data)
-    timestring = "20230610_101237_031621"  # "20230610_101241_703126"  # "20230610_101246_186982"  #  "20230610_101237_031621"  # "20230603_073335_114703"  # "20230603_044727_785177"
-    # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_train.txt",
-    #                                  f"test/comparison_{timestring}_best_train_log.png",
-    #                                  title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
-    # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_val.txt",
-    #                                  f"test/comparison_{timestring}_best_test_log.png",
-    #                                  title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
 
-    # !output_20230621_180016_372659*
-    # !output_20230621_180020_314195*
-    # !output_20230621_180024_413902*
-    for timestring in ["20230621_180016_372659", "20230621_180020_314195", "20230621_180024_413902"]:
-        # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
-        #                                  f"test/comparison_{timestring}_last_train.png",
-        #                                  title="Results of the Train Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
-        one_time_draw_2d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
-                                         f"test/comparison_{timestring}_last_test.png",
-                                         title="Results of the Test Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
+    # timestring = "20230610_101237_031621"  # "20230610_101241_703126"  # "20230610_101246_186982"  #  "20230610_101237_031621"  # "20230603_073335_114703"  # "20230603_044727_785177"
+    # # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_train.txt",
+    # #                                  f"test/comparison_{timestring}_best_train_log.png",
+    # #                                  title="Results of the Train Set (n=101580) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    # # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_val.txt",
+    # #                                  f"test/comparison_{timestring}_best_test_log.png",
+    # #                                  title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
+    #
+    # # !output_20230621_180016_372659*
+    # # !output_20230621_180020_314195*
+    # # !output_20230621_180024_413902*
+    # for timestring in ["20230621_180016_372659", "20230621_180020_314195", "20230621_180024_413902"]:
+    #     # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
+    #     #                                  f"test/comparison_{timestring}_last_train.png",
+    #     #                                  title="Results of the Train Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
+    #     one_time_draw_2d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
+    #                                      f"test/comparison_{timestring}_last_test.png",
+    #                                      title="Results of the Test Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
 
 
 
@@ -710,6 +713,7 @@ if __name__ == "__main__":
 
     # one_time_filter_data("data/dataset_3_4_5_v0604.csv", [999999, 200, 100])
     # one_time_filter_data("data/dataset_0_1_v0618.csv", [999999, 200, 100])
+    one_time_filter_data("data/dataset_v0628_large.csv", [999999, 200, 100])
 
     # data = [[1, 3, 4, 98],
     #         [2, 10, 8, 87],
