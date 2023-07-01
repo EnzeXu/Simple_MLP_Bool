@@ -199,6 +199,134 @@ def draw_3d_points(data_truth, data_prediction, data_error, save_path, title=Non
     # plot_value_distribution(data_error[:, -1], save_path=save_path.replace(".png", "_distribution.png"))
 
 
+def draw_2d_points(data_truth, data_prediction, data_error, save_path, title=None):
+    # data_truth = data_truth
+    # data_prediction = data_prediction
+    np.random.shuffle(data_truth)
+    np.random.shuffle(data_prediction)
+    np.random.shuffle(data_error)
+    fig = plt.figure(figsize=(16, 8))
+
+    truth_y_min = np.min(data_truth[:, -1])
+    truth_y_max = np.max(data_truth[:, -1])
+    error_y_min = np.min(data_error[:, -1])
+    error_y_max = np.max(data_error[:, -1])
+
+    x_label = "k_hyz"
+    y_label = "k_pyx"
+    # z_label = "k_smzx"
+
+    ax1 = fig.add_subplot(121)
+
+    data_truth_0 = data_truth[data_truth[:, -1] == 0]
+    data_truth_1 = data_truth[data_truth[:, -1] == 1]
+
+    x0 = [point[0] for point in data_truth_0]
+    y0 = [point[1] for point in data_truth_0]
+    # z0 = [point[2] for point in data_truth_0]
+
+    x1 = [point[0] for point in data_truth_1]
+    y1 = [point[1] for point in data_truth_1]
+    # z1 = [point[2] for point in data_truth_1]
+
+    scatter = ax1.scatter(x0, y0, c="grey", label="Non-osci", alpha=0.2)
+    scatter = ax1.scatter(x1, y1, c="red", label="Osci", alpha=0.2)
+
+    ax1.legend(fontsize=20)
+
+    ax1.set_xlabel(x_label)
+    ax1.set_ylabel(y_label)
+    # ax1.set_zlabel(z_label)
+    ax1.tick_params(axis='x', labelsize=10)
+    ax1.tick_params(axis='y', labelsize=10)
+    # ax1.tick_params(axis='z', labelsize=10)
+    ax1.set_title("Data Distribution", fontsize=20) # ax1.set_title("Truth of CYCLE_TIME", fontsize=20)
+
+
+    # ax2 = fig.add_subplot(222)
+    #
+    # data_prediction_0 = data_prediction[data_prediction[:, -1] == 0]
+    # data_prediction_1 = data_prediction[data_prediction[:, -1] == 1]
+    #
+    # x0 = [point[0] for point in data_prediction_0]
+    # y0 = [point[1] for point in data_prediction_0]
+    # # z0 = [point[2] for point in data_prediction_0]
+    #
+    # x1 = [point[0] for point in data_prediction_1]
+    # y1 = [point[1] for point in data_prediction_1]
+    # # z1 = [point[2] for point in data_prediction_1]
+    #
+    # scatter = ax2.scatter(x0, y0, c="grey", label="Non-osci", alpha=0.2)
+    # scatter = ax2.scatter(x1, y1, c="red", label="Osci", alpha=0.2)
+    #
+    # ax2.legend(fontsize=20)
+    #
+    # ax2.set_xlabel(x_label)
+    # ax2.set_ylabel(y_label)
+    # # ax2.set_zlabel(z_label)
+    # ax2.tick_params(axis='x', labelsize=10)
+    # ax2.tick_params(axis='y', labelsize=10)
+    # # ax2.tick_params(axis='z', labelsize=10)
+    # ax2.set_title("Prediction of CYCLE_TIME", fontsize=20)
+
+    ax3 = fig.add_subplot(122)
+
+    data_error_0 = data_error[data_error[:, -1] == 0]
+    data_error_1 = data_error[data_error[:, -1] == 1]
+
+    x0 = [point[0] for point in data_error_0]
+    y0 = [point[1] for point in data_error_0]
+    # z0 = [point[2] for point in data_error_0]
+    x1 = [point[0] for point in data_error_1]
+    y1 = [point[1] for point in data_error_1]
+    # z1 = [point[2] for point in data_error_1]
+
+    scatter = ax3.scatter(x0, y0, c="purple", label=f"Truth=0 & Pred=1 ({len(data_error_0)})", alpha=0.5)
+    scatter = ax3.scatter(x1, y1, c="lime", label=f"Truth=1 & Pred=0 ({len(data_error_1)})", alpha=0.5)
+
+    ax3.legend(fontsize=20)
+
+    ax3.set_xlabel(x_label)
+    ax3.set_ylabel(y_label)
+    # ax3.set_zlabel(z_label)
+    ax3.tick_params(axis='x', labelsize=10)
+    ax3.tick_params(axis='y', labelsize=10)
+    # ax3.tick_params(axis='z', labelsize=10)
+    ax3.set_title(f"Error Cases ($n_{{E}}={len(data_error)}$)", fontsize=20)
+    #
+    # ax4 = fig.add_subplot(224, projection='3d')
+    # x = [point[0] for point in data_error_remarkable]
+    # y = [point[1] for point in data_error_remarkable]
+    # z = [point[2] for point in data_error_remarkable]
+    # val = [point[3] for point in data_error_remarkable]
+    #
+    # cmap = 'coolwarm'
+    #
+    # scatter = ax4.scatter(x, y, z, c=val, cmap=cmap, alpha=0.4)
+    # colorbar = plt.colorbar(ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=error_y_min, vmax=error_y_max)), ax=ax4,
+    #                         shrink=0.5)
+    #
+    # ax4.set_xlabel(x_label)
+    # ax4.set_ylabel(y_label)
+    # ax4.set_zlabel(z_label)
+    # ax4.tick_params(axis='x', labelsize=10)
+    # ax4.tick_params(axis='y', labelsize=10)
+    # ax4.tick_params(axis='z', labelsize=10)
+    # ax4.set_title("Remarkable Error ($e>0.1$, $n_{{R}}={0:d}$) Distribution".format(len(data_error_remarkable)), fontsize=20)  # , len(data_error_remarkable) / len(data_error) * 100.0
+
+    #remarkable
+
+    # plt.show()
+    if title:
+        fig.suptitle(title, fontsize=20)
+    plt.tight_layout()
+    # plt.subplots_adjust(right=0.8)
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+    print("max", np.max(data_error[:, -1]))
+    print("min", np.min(data_error[:, -1]))
+    # plot_value_distribution(data_error[:, -1], save_path=save_path.replace(".png", "_distribution.png"))
+
 def plot_value_distribution_bool(data, save_path):
     fig = plt.figure(figsize=(24, 6))
     bin_edges = np.arange(0.0, 2.0, 0.05)
@@ -272,6 +400,44 @@ def one_time_draw_3d_points_from_txt_bool(txt_path, save_path, title=None, log_f
     draw_3d_points(data_truth, data_prediction, data_error, save_path, title.format(len(lines)))
     print(f"saved \"{title}\" to {save_path}")
 
+def one_time_draw_2d_points_from_txt_bool(txt_path, save_path, title=None, log_flag=False):
+    with open(txt_path, "r") as f:
+        lines = f.readlines()
+    lines = [line for line in lines if "," in line and "x" not in line]
+    data_truth = []
+    data_prediction = []
+    data_error = []
+    data_2D_correct = []
+    data_2D_wrong = []
+    # data_2D_truth = []
+    for one_line in lines[:]:
+        parts = one_line.split(",")
+        if log_flag:
+            parts[1] = np.log(float(parts[1]))
+            parts[2] = np.log(float(parts[2]))
+            # parts[3] = np.log(float(parts[3]))
+        data_truth.append((float(parts[1]), float(parts[2]), float(parts[3])))
+
+        data_prediction.append((float(parts[1]), float(parts[2]), int(parts[4])))
+        if int(parts[3]) != int(parts[4]):
+            data_error.append((float(parts[1]), float(parts[2]), int(parts[3])))
+            data_2D_wrong.append((float(parts[1]), float(parts[2]), "false"))
+        else:
+            data_2D_correct.append((float(parts[1]), float(parts[2]), "true"))
+    # print("data_truth:")
+    # print(data_truth)
+    # print("data_prediction:")
+    # print(data_prediction)
+    # print("data_error:")
+    # print(data_error)
+
+    # draw_3_2d_points_bool(data_2D_correct, data_2D_wrong, data_truth, save_path.replace(".png", "_2D.png"))
+
+    data_truth = np.asarray(data_truth)
+    data_prediction = np.asarray(data_prediction)
+    data_error = np.asarray(data_error)
+    draw_2d_points(data_truth, data_prediction, data_error, save_path, title.format(len(lines)))
+    print(f"saved \"{title}\" to {save_path}")
 
 # def one_time_filter_data(data_path, filter_list):
 #     with open(data_path, "r") as f:
@@ -525,13 +691,17 @@ if __name__ == "__main__":
     # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_best_val.txt",
     #                                  f"test/comparison_{timestring}_best_test_log.png",
     #                                  title="Results of the Test Set (n=25396) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=True)
-    # for timestring in ["20230610_101237_031621", "20230610_101241_703126", "20230610_101246_186982"]:
-    #     one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
-    #                                      f"test/comparison_{timestring}_last_train.png",
-    #                                      title="Results of the Train Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
-    #     one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
-    #                                      f"test/comparison_{timestring}_last_test.png",
-    #                                      title="Results of the Test Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
+
+    # !output_20230621_180016_372659*
+    # !output_20230621_180020_314195*
+    # !output_20230621_180024_413902*
+    for timestring in ["20230621_180016_372659", "20230621_180020_314195", "20230621_180024_413902"]:
+        # one_time_draw_3d_points_from_txt_bool(f"record/output/output_{timestring}_last_train.txt",
+        #                                  f"test/comparison_{timestring}_last_train.png",
+        #                                  title="Results of the Train Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
+        one_time_draw_2d_points_from_txt_bool(f"record/output/output_{timestring}_last_val.txt",
+                                         f"test/comparison_{timestring}_last_test.png",
+                                         title="Results of the Test Set (n={}) [dataset=k_hyz_k_pyx_k_smzx]", log_flag=False)
 
 
 
@@ -539,7 +709,7 @@ if __name__ == "__main__":
     #     pass
 
     # one_time_filter_data("data/dataset_3_4_5_v0604.csv", [999999, 200, 100])
-    one_time_filter_data("data/dataset_0_1_v0618.csv", [999999, 200, 100])
+    # one_time_filter_data("data/dataset_0_1_v0618.csv", [999999, 200, 100])
 
     # data = [[1, 3, 4, 98],
     #         [2, 10, 8, 87],
